@@ -1267,8 +1267,6 @@ select {
 
 .comment-author {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--s4);
   font-weight: bold;
   letter-spacing: 0.05em;
   margin-bottom: 4px;
@@ -1390,7 +1388,6 @@ footer .accent { color: var(--s2); }
 </head>
 <body>
 
-<!-- ========== SETUP SCREEN ========== -->
 <div id="setupScreen" style="display:none">
   <div class="setup-hero">
     <h1>파이어베이스를<br>연결해주세요<span class="accent">.</span></h1>
@@ -1487,7 +1484,6 @@ service cloud.firestore {
   </div>
 </div>
 
-<!-- ========== MAIN APP ========== -->
 <div id="app">
 
 <header>
@@ -1826,10 +1822,7 @@ service cloud.firestore {
   <span>핵심 문장 · 인간은 도덕적 책임을 지는 주체입니다</span>
 </footer>
 
-</div><!-- /#app -->
-
-<!-- Profile modal (class code + name) -->
-<div class="modal-overlay" id="profileModal">
+</div><div class="modal-overlay" id="profileModal">
   <div class="modal profile-modal">
     <h2 id="profileModalTitle">처음 오셨네요<span>.</span></h2>
     <p class="modal-sub" id="profileModalSub">수업 코드와 이름을 입력해주세요. 같은 수업 코드를 가진 친구들과 의견이 공유됩니다.</p>
@@ -1845,7 +1838,6 @@ service cloud.firestore {
   </div>
 </div>
 
-<!-- Robot detail modal -->
 <div class="modal-overlay" id="robotDetailModal">
   <div class="modal wide">
     <button class="modal-close" data-close="robotDetailModal">✕</button>
@@ -1898,6 +1890,11 @@ function showFatalError(msg) {
 }
 
 async function bootApp() {
+  // -----------------------------
+  // Helpers (★오류 수정을 위해 최상단으로 이동 완료★)
+  // -----------------------------
+  const $ = (id) => document.getElementById(id);
+
   // Dynamic imports so they only run when config is set
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js");
   const {
@@ -1938,8 +1935,8 @@ async function bootApp() {
   // Sanitize class code (no slashes, no whitespace)
   classCode = classCode.replace(/[\/\\\s'"]+/g, '-').slice(0, 40) || 'default';
 
-  document.getElementById('userChipName').textContent = userName;
-  document.getElementById('userChipClass').textContent = classCode;
+  $('userChipName').textContent = userName;
+  $('userChipClass').textContent = classCode;
 
   // -----------------------------
   // Caches & filter state
@@ -1957,11 +1954,6 @@ async function bootApp() {
   let principleSort = 'votes';
   let currentDetailRobotId = null;
   let detailCommentsUnsub = null;
-
-  // -----------------------------
-  // Helpers
-  // -----------------------------
-  const $ = (id) => document.getElementById(id);
 
   function escapeHtml(s) {
     return String(s)
