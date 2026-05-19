@@ -1891,7 +1891,7 @@ function showFatalError(msg) {
 
 async function bootApp() {
   // -----------------------------
-  // Helpers (★오류 수정을 위해 최상단으로 이동 완료★)
+  // Helpers
   // -----------------------------
   const $ = (id) => document.getElementById(id);
 
@@ -2142,12 +2142,13 @@ async function bootApp() {
   });
 
   // -----------------------------
-  // Render: Value line
+  // Render: Value line (★수직선 겹침 및 간격 버그 수정 완료★)
   // -----------------------------
   function renderValueLine() {
     const line = $('valueLine');
     if (!cache.valueLine.length) {
       line.innerHTML = '<div class="empty" style="margin-top: 40px;"><div class="empty-icon">📝</div>아직 의견이 없어요. 슬라이더를 움직여 첫 의견을 붙여보세요!</div>';
+      line.style.minHeight = '320px'; // 초기화
       return;
     }
     const colors = ['var(--post-pink)','var(--post-yellow)','var(--post-blue)','var(--post-green)','var(--post-purple)'];
@@ -2157,6 +2158,14 @@ async function bootApp() {
       byScore[p.score].push(p);
     });
 
+    // 한 점수에 여러 개의 포스트잇이 쌓일 때 판의 높이를 동적으로 조절합니다.
+    let maxCount = 0;
+    Object.values(byScore).forEach(posts => {
+      if (posts.length > maxCount) maxCount = posts.length;
+    });
+    // 포스트잇 하나당 간격(120px)에 맞추어 최소 높이를 유연하게 늘려줍니다.
+    line.style.minHeight = Math.max(320, 40 + maxCount * 125) + 'px';
+
     let html = '';
     Object.keys(byScore).forEach(score => {
       const posts = byScore[score];
@@ -2165,7 +2174,10 @@ async function bootApp() {
         const hash = (p.author + p.score).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
         const color = colors[hash % colors.length];
         const rot = ((hash % 7) - 3);
-        const top = 8 + (idx * 16);
+        
+        // 중요: idx * 16에서 idx * 120으로 수정하여 포스트잇 내용이 겹치지 않고 온전히 보이게 합니다.
+        const top = 8 + (idx * 120); 
+        
         html += `
           <div class="postit" style="left: calc(${leftPct}% - 65px); top: ${top}px; background: ${color}; --rot: ${rot}deg;">
             <div class="postit-name">${escapeHtml(p.author)} · ${p.score}</div>
